@@ -1,7 +1,13 @@
 'use client'
 
+import {
+  createWeightRecord as apiCreateWeightRecord,
+  deleteWeightRecordById,
+  fetchWeightRecordById,
+  fetchWeightRecords,
+  updateWeightRecordById,
+} from '@/lib/api'
 import { logWeightRecordDelete, logWeightRecordUpdate } from '@/lib/supabase/audit'
-import { createClient } from '@/lib/supabase/client'
 import type { WeightRecord, WeightRecordInsert, WeightRecordUpdate } from '@/types/database.types'
 import { useCallback, useEffect, useState } from 'react'
 import { useRealtimeSubscription } from './useRealtimeSubscription'
@@ -26,38 +32,25 @@ export function useWeightRecords(options: UseWeightRecordsOptions = {}): UseWeig
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
-
-  // Fetch weight records
-  const fetchRecords = useCallback(async () => {
+  // Fetch weight records using API layer
+  const loadRecords = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      let query = supabase
-        .from('weight_records')
-        .select('*')
-        .order('recorded_at', { ascending: false })
-
-      if (participantId) {
-        query = query.eq('participant_id', participantId)
-      }
-
-      const { data, error: fetchError } = await query
-
-      if (fetchError) throw fetchError
-      setRecords((data as WeightRecord[]) || [])
+      const data = await fetchWeightRecords(participantId)
+      setRecords(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch weight records')
+      setError(err instanceof Error ? err.message : 'Error al cargar registros de peso')
     } finally {
       setLoading(false)
     }
-  }, [supabase, participantId])
+  }, [participantId])
 
   // Initial fetch
   useEffect(() => {
-    fetchRecords()
-  }, [fetchRecords])
+    loadRecords()
+  }, [loadRecords])
 
   // Realtime subscription for weight records
   useRealtimeSubscription<WeightRecord>({
@@ -66,7 +59,6 @@ export function useWeightRecords(options: UseWeightRecordsOptions = {}): UseWeig
     onInsert: (newRecord) => {
       if (!participantId || newRecord.participant_id === participantId) {
         setRecords((prev) => {
-          // Insert in correct order (by recorded_at descending)
           const newRecords = [...prev, newRecord]
           return newRecords.sort(
             (a, b) => new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()
@@ -85,93 +77,61 @@ export function useWeightRecords(options: UseWeightRecordsOptions = {}): UseWeig
   })
 
   // Create a new weight record
-  const createRecord = useCallback(
-    async (data: WeightRecordInsert): Promise<WeightRecord | null> => {
-      try {
-        const { data: newRecord, error: insertError } = await supabase
-          .from('weight_records')
-          .insert(data)
-          .select()
-          .single()
-
-        if (insertError) throw insertError
-        return newRecord as WeightRecord
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create weight record')
-        return null
-      }
-    },
-    [supabase]
-  )
+  const createRecord = useCallback(async (data: WeightRecordInsert): Promise<WeightRecord | null> => {
+    try {
+      return await apiCreateWeightRecord(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear registro de peso')
+      return null
+    }
+  }, [])
 
   // Update a weight record (with audit logging)
   const updateRecord = useCallback(
     async (id: string, data: WeightRecordUpdate): Promise<WeightRecord | null> => {
       try {
-        // First get the current data for audit
-        const { data: oldData, error: fetchError } = await supabase
-          .from('weight_records')
-          .select('*')
-          .eq('id', id)
-          .single()
+        // Get current data for audit
+        const oldData = await fetchWeightRecordById(id)
+        if (!oldData) throw new Error('Registro no encontrado')
 
-        if (fetchError) throw fetchError
+        // Perform update
+        const updatedRecord = await updateWeightRecordById(id, data)
 
-        // Perform the update
-        const { data: updatedRecord, error: updateError } = await supabase
-          .from('weight_records')
-          .update(data)
-          .eq('id', id)
-          .select()
-          .single()
-
-        if (updateError) throw updateError
-
-        // Log the audit (fire and forget)
+        // Log audit (fire and forget)
         logWeightRecordUpdate(
           id,
-          oldData as Record<string, unknown>,
-          updatedRecord as Record<string, unknown>
+          oldData as unknown as Record<string, unknown>,
+          updatedRecord as unknown as Record<string, unknown>
         )
 
-        return updatedRecord as WeightRecord
+        return updatedRecord
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to update weight record')
+        setError(err instanceof Error ? err.message : 'Error al actualizar registro de peso')
         return null
       }
     },
-    [supabase]
+    []
   )
 
   // Delete a weight record (with audit logging)
-  const deleteRecord = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        // First get the current data for audit
-        const { data: oldData, error: fetchError } = await supabase
-          .from('weight_records')
-          .select('*')
-          .eq('id', id)
-          .single()
+  const deleteRecord = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      // Get current data for audit
+      const oldData = await fetchWeightRecordById(id)
+      if (!oldData) throw new Error('Registro no encontrado')
 
-        if (fetchError) throw fetchError
+      // Perform delete
+      await deleteWeightRecordById(id)
 
-        // Perform the delete
-        const { error: deleteError } = await supabase.from('weight_records').delete().eq('id', id)
+      // Log audit (fire and forget)
+      logWeightRecordDelete(id, oldData as unknown as Record<string, unknown>)
 
-        if (deleteError) throw deleteError
-
-        // Log the audit (fire and forget)
-        logWeightRecordDelete(id, oldData as Record<string, unknown>)
-
-        return true
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to delete weight record')
-        return false
-      }
-    },
-    [supabase]
-  )
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar registro de peso')
+      return false
+    }
+  }, [])
 
   return {
     records,
@@ -180,6 +140,6 @@ export function useWeightRecords(options: UseWeightRecordsOptions = {}): UseWeig
     createRecord,
     updateRecord,
     deleteRecord,
-    refetch: fetchRecords,
+    refetch: loadRecords,
   }
 }

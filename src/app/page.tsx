@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { LeaderboardTable } from '@/components/stats/LeaderboardTable'
+import { WeightProgressChart } from '@/components/stats/WeightProgressChart'
 import { LinkButton } from '@/components/ui'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useEffect, useState } from 'react'
@@ -145,9 +146,22 @@ export default function Dashboard() {
           <LeaderboardTable rankings={rankings} loading={loading} />
         </div>
 
+        {/* Weight Progress Chart */}
+        <div className="animate-fade-in-up stagger-3 mt-8 card-hover rounded-lg bg-white/80 p-4 shadow-lg backdrop-blur-sm sm:p-6 dark:bg-gray-800/80">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
+              📈 Progreso de Peso
+            </h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Evolución del peso de todos los participantes a lo largo del tiempo
+            </p>
+          </div>
+          <WeightProgressChart />
+        </div>
+
         {/* Info Section */}
         <div className="mt-8 grid gap-6 md:grid-cols-3">
-          <div className="animate-fade-in-up stagger-3 card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
+          <div className="animate-fade-in-up stagger-4 card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
             <div className="mb-3 flex items-center gap-2">
               <HiOutlineQuestionMarkCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Cómo Funciona</h3>
@@ -160,7 +174,7 @@ export default function Dashboard() {
             </ul>
           </div>
 
-          <div className="animate-fade-in-up stagger-4 card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
+          <div className="animate-fade-in-up stagger-5 card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
             <div className="mb-3 flex items-center gap-2">
               <HiOutlineClock className="h-6 w-6 text-green-600 dark:text-green-400" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -173,7 +187,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="animate-fade-in-up stagger-5 card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
+          <div className="animate-fade-in-up card-hover rounded-lg border border-gray-200/50 bg-white/80 p-6 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/80">
             <div className="mb-3 flex items-center gap-2">
               <HiOutlineShieldCheck className="h-6 w-6 text-amber-600 dark:text-amber-400" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

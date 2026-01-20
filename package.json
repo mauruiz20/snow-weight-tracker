@@ -18,7 +18,8 @@
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-icons": "^5.4.0"
+    "react-icons": "^5.4.0",
+    "recharts": "^2.15.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

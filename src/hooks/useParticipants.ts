@@ -1,7 +1,13 @@
 'use client'
 
+import {
+  createParticipant as apiCreateParticipant,
+  fetchParticipantById,
+  fetchParticipantRankings,
+  fetchParticipants,
+  updateParticipantById,
+} from '@/lib/api'
 import { logParticipantUpdate } from '@/lib/supabase/audit'
-import { createClient } from '@/lib/supabase/client'
 import type {
   Participant,
   ParticipantInsert,
@@ -33,46 +39,37 @@ export function useParticipants(options: UseParticipantsOptions = {}): UsePartic
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
-
-  // Fetch all participants
-  const fetchParticipants = useCallback(async () => {
+  // Fetch all participants using API layer
+  const loadParticipants = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('participants')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (fetchError) throw fetchError
-      setParticipants((data as Participant[]) || [])
+      const data = await fetchParticipants()
+      setParticipants(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch participants')
+      setError(err instanceof Error ? err.message : 'Error al cargar participantes')
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
-  // Fetch rankings
-  const fetchRankings = useCallback(async () => {
+  // Fetch rankings using API layer
+  const loadRankings = useCallback(async () => {
     if (!includeRankings) return
 
     try {
-      const { data, error: fetchError } = await supabase.from('participant_rankings').select('*')
-
-      if (fetchError) throw fetchError
-      setRankings((data as ParticipantRanking[]) || [])
+      const data = await fetchParticipantRankings()
+      setRankings(data)
     } catch (err) {
-      console.error('Failed to fetch rankings:', err)
+      console.error('Error al cargar rankings:', err)
     }
-  }, [supabase, includeRankings])
+  }, [includeRankings])
 
   // Refetch both participants and rankings
   const refetch = useCallback(async () => {
-    await Promise.all([fetchParticipants(), fetchRankings()])
-  }, [fetchParticipants, fetchRankings])
+    await Promise.all([loadParticipants(), loadRankings()])
+  }, [loadParticipants, loadRankings])
 
   // Initial fetch
   useEffect(() => {
@@ -84,17 +81,17 @@ export function useParticipants(options: UseParticipantsOptions = {}): UsePartic
     table: 'participants',
     onInsert: (newParticipant) => {
       setParticipants((prev) => [newParticipant, ...prev])
-      if (includeRankings) fetchRankings()
+      if (includeRankings) loadRankings()
     },
     onUpdate: (updatedParticipant) => {
       setParticipants((prev) =>
         prev.map((p) => (p.id === updatedParticipant.id ? updatedParticipant : p))
       )
-      if (includeRankings) fetchRankings()
+      if (includeRankings) loadRankings()
     },
     onDelete: (deletedParticipant) => {
       setParticipants((prev) => prev.filter((p) => p.id !== deletedParticipant.id))
-      if (includeRankings) fetchRankings()
+      if (includeRankings) loadRankings()
     },
   })
 
@@ -102,80 +99,51 @@ export function useParticipants(options: UseParticipantsOptions = {}): UsePartic
   const createParticipant = useCallback(
     async (data: ParticipantInsert): Promise<Participant | null> => {
       try {
-        const { data: newParticipant, error: insertError } = await supabase
-          .from('participants')
-          .insert(data)
-          .select()
-          .single()
-
-        if (insertError) throw insertError
-        return newParticipant as Participant
+        return await apiCreateParticipant(data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create participant')
+        setError(err instanceof Error ? err.message : 'Error al crear participante')
         return null
       }
     },
-    [supabase]
+    []
   )
 
   // Update a participant (with audit logging)
   const updateParticipant = useCallback(
     async (id: string, data: ParticipantUpdate): Promise<Participant | null> => {
       try {
-        // First get the current data for audit
-        const { data: oldData, error: fetchError } = await supabase
-          .from('participants')
-          .select('*')
-          .eq('id', id)
-          .single()
+        // Get current data for audit
+        const oldData = await fetchParticipantById(id)
+        if (!oldData) throw new Error('Participante no encontrado')
 
-        if (fetchError) throw fetchError
+        // Perform update
+        const updatedParticipant = await updateParticipantById(id, data)
 
-        // Perform the update
-        const { data: updatedParticipant, error: updateError } = await supabase
-          .from('participants')
-          .update(data)
-          .eq('id', id)
-          .select()
-          .single()
-
-        if (updateError) throw updateError
-
-        // Log the audit (fire and forget)
+        // Log audit (fire and forget)
         logParticipantUpdate(
           id,
-          oldData as Record<string, unknown>,
-          updatedParticipant as Record<string, unknown>
+          oldData as unknown as Record<string, unknown>,
+          updatedParticipant as unknown as Record<string, unknown>
         )
 
-        return updatedParticipant as Participant
+        return updatedParticipant
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to update participant')
+        setError(err instanceof Error ? err.message : 'Error al actualizar participante')
         return null
       }
     },
-    [supabase]
+    []
   )
 
   // Get a single participant by ID
-  const getParticipant = useCallback(
-    async (id: string): Promise<Participant | null> => {
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('participants')
-          .select('*')
-          .eq('id', id)
-          .single()
-
-        if (fetchError) throw fetchError
-        return data as Participant
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch participant')
-        return null
-      }
-    },
-    [supabase]
-  )
+  const getParticipant = useCallback(async (id: string): Promise<Participant | null> => {
+    try {
+      return await fetchParticipantById(id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar participante')
+      return null
+    }
+  }, [])
 
   return {
     participants,
