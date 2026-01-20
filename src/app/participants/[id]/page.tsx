@@ -17,6 +17,7 @@ import { HiOutlinePencilSquare } from 'react-icons/hi2'
 interface ParticipantFormData {
   name: string
   age: number
+  gender: 'male' | 'female'
   initial_weight: number
   height: number
 }
@@ -140,7 +141,9 @@ export default function ParticipantPage({ params }: ParticipantPageProps) {
               <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
                 {participant.name}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Edad: {participant.age}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {participant.age} años • {participant.gender === 'male' ? 'Masculino' : 'Femenino'}
+              </p>
             </div>
             {!isEditing && (
               <Button

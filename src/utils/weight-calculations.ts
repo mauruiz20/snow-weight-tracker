@@ -38,6 +38,40 @@ export function getBMICategory(bmi: number): string {
 }
 
 /**
+ * Calculate body fat percentage using Deurenberg formula
+ * BF% = (1.20 × BMI) + (0.23 × Age) - (10.8 × Sex) - 5.4
+ * Where Sex = 1 for male, 0 for female
+ */
+export function calculateBodyFat(
+  bmi: number,
+  age: number,
+  gender: 'male' | 'female'
+): number {
+  const sexFactor = gender === 'male' ? 1 : 0
+  const bodyFat = 1.2 * bmi + 0.23 * age - 10.8 * sexFactor - 5.4
+  return Number(bodyFat.toFixed(1))
+}
+
+/**
+ * Get body fat category in Spanish
+ */
+export function getBodyFatCategory(bodyFat: number, gender: 'male' | 'female'): string {
+  if (gender === 'male') {
+    if (bodyFat < 6) return 'Esencial'
+    if (bodyFat < 14) return 'Atleta'
+    if (bodyFat < 18) return 'Fitness'
+    if (bodyFat < 25) return 'Aceptable'
+    return 'Obesidad'
+  }
+  // Female
+  if (bodyFat < 14) return 'Esencial'
+  if (bodyFat < 21) return 'Atleta'
+  if (bodyFat < 25) return 'Fitness'
+  if (bodyFat < 32) return 'Aceptable'
+  return 'Obesidad'
+}
+
+/**
  * Get the latest weight record from a list
  */
 export function getLatestWeight(records: WeightRecord[]): WeightRecord | null {
@@ -67,6 +101,8 @@ export interface WeightStats {
   totalRecords: number
   currentBMI: number | null
   bmiCategory: string | null
+  bodyFatPercentage: number | null
+  bodyFatCategory: string | null
 }
 
 export function calculateWeightStats(
@@ -87,6 +123,8 @@ export function calculateWeightStats(
   )
   const currentBMI = calculateBMI(currentWeight, participant.height)
   const bmiCategory = currentBMI ? getBMICategory(currentBMI) : null
+  const bodyFatPercentage = currentBMI ? calculateBodyFat(currentBMI, participant.age, participant.gender) : null
+  const bodyFatCategory = bodyFatPercentage ? getBodyFatCategory(bodyFatPercentage, participant.gender) : null
 
   return {
     currentWeight,
@@ -97,6 +135,8 @@ export function calculateWeightStats(
     totalRecords: participantRecords.length,
     currentBMI,
     bmiCategory,
+    bodyFatPercentage,
+    bodyFatCategory,
   }
 }
 

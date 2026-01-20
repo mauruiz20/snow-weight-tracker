@@ -19,6 +19,8 @@ export function WeightStatsCard({ participant, stats }: WeightStatsCardProps) {
     totalRecords,
     currentBMI,
     bmiCategory,
+    bodyFatPercentage,
+    bodyFatCategory,
   } = stats
 
   return (
@@ -58,7 +60,7 @@ export function WeightStatsCard({ participant, stats }: WeightStatsCardProps) {
       </div>
 
       {/* Additional Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">Altura</p>
           <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
@@ -73,6 +75,18 @@ export function WeightStatsCard({ participant, stats }: WeightStatsCardProps) {
             {bmiCategory && (
               <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
                 ({bmiCategory})
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Grasa Corporal</p>
+          <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+            {bodyFatPercentage ? `${bodyFatPercentage}%` : '-'}
+            {bodyFatCategory && (
+              <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                ({bodyFatCategory})
               </span>
             )}
           </p>

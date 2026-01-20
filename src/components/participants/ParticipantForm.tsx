@@ -8,6 +8,7 @@ import { HiOutlineCheck, HiOutlineXMark } from 'react-icons/hi2'
 interface ParticipantFormData {
   name: string
   age: number
+  gender: 'male' | 'female'
   initial_weight: number
   height: number
 }
@@ -27,6 +28,7 @@ export function ParticipantForm({
 }: ParticipantFormProps) {
   const [name, setName] = useState(participant?.name || '')
   const [age, setAge] = useState(participant?.age?.toString() || '')
+  const [gender, setGender] = useState<'male' | 'female'>(participant?.gender || 'male')
   const [initialWeight, setInitialWeight] = useState(participant?.initial_weight?.toString() || '')
   const [height, setHeight] = useState(participant?.height?.toString() || '')
   const [error, setError] = useState<string | null>(null)
@@ -65,6 +67,7 @@ export function ParticipantForm({
       await onSubmit({
         name: name.trim(),
         age: ageNum,
+        gender,
         initial_weight: weightNum,
         height: heightNum,
       })
@@ -104,6 +107,22 @@ export function ParticipantForm({
         disabled={isLoading}
         required
       />
+
+      <div>
+        <label htmlFor="gender" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Sexo
+        </label>
+        <select
+          id="gender"
+          value={gender}
+          onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+          disabled={isLoading}
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:disabled:bg-gray-700"
+        >
+          <option value="male">Masculino</option>
+          <option value="female">Femenino</option>
+        </select>
+      </div>
 
       <Input
         id="initialWeight"

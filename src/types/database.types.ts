@@ -8,6 +8,7 @@ export interface Database {
           id: string
           name: string
           age: number
+          gender: 'male' | 'female'
           initial_weight: number
           height: number
           created_at: string
@@ -17,6 +18,7 @@ export interface Database {
           id?: string
           name: string
           age: number
+          gender?: 'male' | 'female'
           initial_weight: number
           height: number
           created_at?: string
@@ -26,6 +28,7 @@ export interface Database {
           id?: string
           name?: string
           age?: number
+          gender?: 'male' | 'female'
           initial_weight?: number
           height?: number
           created_at?: string
@@ -113,6 +116,7 @@ export interface Database {
           id: string
           name: string
           age: number
+          gender: 'male' | 'female'
           initial_weight: number
           height: number
           created_at: string
@@ -124,6 +128,7 @@ export interface Database {
           max_weight: number | null
           total_records: number
           current_bmi: number | null
+          body_fat_percentage: number | null
         }
         Relationships: []
       }
