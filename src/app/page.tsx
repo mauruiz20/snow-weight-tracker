@@ -73,23 +73,23 @@ export default function Dashboard() {
               ⏱️ Tiempo restante para el viaje
             </p>
             <div className="flex justify-center gap-2 sm:gap-4">
-              <div className="rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
+              <div className="rounded-lg bg-linear-to-br from-blue-500 to-blue-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
                 <div className="text-2xl font-bold sm:text-3xl">{timeLeft.days}</div>
                 <div className="text-xs uppercase tracking-wide opacity-80">Días</div>
               </div>
-              <div className="rounded-lg bg-gradient-to-br from-green-500 to-green-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
+              <div className="rounded-lg bg-linear-to-br from-green-500 to-green-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
                 <div className="text-2xl font-bold sm:text-3xl">
                   {String(timeLeft.hours).padStart(2, '0')}
                 </div>
                 <div className="text-xs uppercase tracking-wide opacity-80">Horas</div>
               </div>
-              <div className="rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
+              <div className="rounded-lg bg-linear-to-br from-amber-500 to-amber-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
                 <div className="text-2xl font-bold sm:text-3xl">
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </div>
                 <div className="text-xs uppercase tracking-wide opacity-80">Min</div>
               </div>
-              <div className="rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
+              <div className="rounded-lg bg-linear-to-br from-purple-500 to-purple-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3">
                 <div className="text-2xl font-bold sm:text-3xl">
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </div>
