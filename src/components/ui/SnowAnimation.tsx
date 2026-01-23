@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 interface Snowflake {
   id: number
@@ -11,35 +11,45 @@ interface Snowflake {
   opacity: number
 }
 
-export const SnowAnimation = () => {
-  const [snowflakes, setSnowflakes] = useState<Snowflake[]>([])
+const generateSnowflakes = (): Snowflake[] => {
+  // Detect if mobile device (screen width < 768px)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
-  useEffect(() => {
-    // Generate random snowflakes on mount
-    const flakes: Snowflake[] = Array.from({ length: 35 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 8,
-      duration: 10 + Math.random() * 10,
-      size: 8 + Math.random() * 12,
-      opacity: 0.5 + Math.random() * 0.4,
-    }))
-    setSnowflakes(flakes)
-  }, [])
+  // Reduce snowflakes on mobile for better performance
+  // Desktop: 35 snowflakes, Mobile: 12 snowflakes
+  const flakeCount = isMobile ? 12 : 35
+
+  // Generate random snowflakes
+  return Array.from({ length: flakeCount }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 8,
+    duration: 10 + Math.random() * 10,
+    size: isMobile ? 6 + Math.random() * 8 : 8 + Math.random() * 12, // Smaller on mobile
+    opacity: isMobile ? 0.3 + Math.random() * 0.3 : 0.5 + Math.random() * 0.4 // Lower opacity on mobile
+  }))
+}
+
+export const SnowAnimation = () => {
+  // Use lazy initializer to generate snowflakes only once on mount
+  const [snowflakes] = useState<Snowflake[]>(generateSnowflakes)
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden" aria-hidden="true">
+    <div
+      className='pointer-events-none fixed inset-0 z-10 overflow-hidden'
+      aria-hidden='true'
+    >
       {/* Falling Snowflakes */}
       {snowflakes.map((flake) => (
         <div
           key={flake.id}
-          className="snowflake absolute text-blue-300 dark:text-blue-200"
+          className='snowflake absolute text-blue-300 dark:text-blue-200'
           style={{
             left: `${flake.left}%`,
             animationDelay: `${flake.delay}s`,
             animationDuration: `${flake.duration}s`,
             fontSize: `${flake.size}px`,
-            opacity: flake.opacity,
+            opacity: flake.opacity
           }}
         >
           ❄
@@ -47,7 +57,7 @@ export const SnowAnimation = () => {
       ))}
 
       {/* Floating Snowboard */}
-      <div className="snowboard-float absolute bottom-8 right-8 text-4xl sm:bottom-12 sm:right-12 sm:text-5xl">
+      <div className='snowboard-float absolute bottom-8 right-8 text-4xl sm:bottom-12 sm:right-12 sm:text-5xl'>
         🏂
       </div>
     </div>
