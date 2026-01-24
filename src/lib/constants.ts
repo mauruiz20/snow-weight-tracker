@@ -9,7 +9,7 @@ export const LOCALE = 'es-ES'
 export const BREAKPOINTS = {
   mobile: 768,
   tablet: 1024,
-  desktop: 1280,
+  desktop: 1280
 } as const
 
 export const isMobile = () =>
@@ -31,12 +31,12 @@ export const ROUTES = {
   home: '/',
   participants: '/participants',
   participantNew: '/participants/new',
-  participant: (id: string) => `/participants/${id}`,
+  participant: (id: string) => `/participants/${id}`
 } as const
 
 // ===== EXTERNAL LINKS =====
 export const EXTERNAL_LINKS = {
-  github: 'https://github.com',
+  github: 'https://github.com'
 } as const
 
 // ===== CHART COLORS =====
@@ -48,7 +48,7 @@ export const CHART_COLORS = [
   '#ec4899', // pink
   '#06b6d4', // cyan
   '#f97316', // orange
-  '#84cc16', // lime
+  '#84cc16' // lime
 ] as const
 
 // ===== WEIGHT TREND CALCULATION =====
@@ -64,7 +64,7 @@ export const TREND_CONFIG = {
   /** Default moving average window size */
   movingAverageWindow: 7,
   /** Minimum points for moving average */
-  movingAverageMinPoints: 3,
+  movingAverageMinPoints: 3
 } as const
 
 // ===== ANIMATION =====
@@ -76,15 +76,15 @@ export const ANIMATION_CONFIG = {
   /** Initial loader display duration (ms) */
   loaderDurationMs: 500,
   /** Countdown update interval (ms) */
-  countdownIntervalMs: 1000,
+  countdownIntervalMs: 1000
 } as const
 
 // ===== CHART =====
 export const CHART_CONFIG = {
   /** Default chart height in pixels */
-  defaultHeight: 350,
+  defaultHeight: 500,
   /** Minimum table width for mobile scroll */
-  minTableWidth: 700,
+  minTableWidth: 700
 } as const
 
 // ===== FORMATTING =====
@@ -96,5 +96,5 @@ export const FORMAT_CONFIG = {
   /** Decimal places for percentage display */
   percentageDecimals: 2,
   /** Decimal places for BMI display */
-  bmiDecimals: 2,
+  bmiDecimals: 2
 } as const
