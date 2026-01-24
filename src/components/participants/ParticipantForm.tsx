@@ -11,6 +11,7 @@ interface ParticipantFormData {
   gender: 'male' | 'female'
   initial_weight: number
   height: number
+  created_at?: string
 }
 
 interface ParticipantFormProps {
@@ -31,6 +32,12 @@ export function ParticipantForm({
   const [gender, setGender] = useState<'male' | 'female'>(participant?.gender || 'male')
   const [initialWeight, setInitialWeight] = useState(participant?.initial_weight?.toString() || '')
   const [height, setHeight] = useState(participant?.height?.toString() || '')
+  const [initialDate, setInitialDate] = useState(() => {
+    if (participant?.created_at) {
+      return new Date(participant.created_at).toISOString().split('T')[0]
+    }
+    return ''
+  })
   const [error, setError] = useState<string | null>(null)
 
   const isEditing = !!participant
@@ -64,13 +71,20 @@ export function ParticipantForm({
     }
 
     try {
-      await onSubmit({
+      const data: ParticipantFormData = {
         name: name.trim(),
         age: ageNum,
         gender,
         initial_weight: weightNum,
         height: heightNum,
-      })
+      }
+
+      // Include created_at when editing and date is provided
+      if (isEditing && initialDate) {
+        data.created_at = new Date(initialDate).toISOString()
+      }
+
+      await onSubmit(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error')
     }
@@ -137,6 +151,18 @@ export function ParticipantForm({
         disabled={isLoading}
         required
       />
+
+      {isEditing && (
+        <Input
+          id="initialDate"
+          label="Fecha de Registro Inicial"
+          type="date"
+          value={initialDate}
+          onChange={(e) => setInitialDate(e.target.value)}
+          disabled={isLoading}
+          helperText="La fecha en que se registró el peso inicial. Afecta los cálculos de tendencia."
+        />
+      )}
 
       <Input
         id="height"

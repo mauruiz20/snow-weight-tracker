@@ -1,6 +1,10 @@
 'use client'
 
-import { useWeightChartData } from '@/hooks/useWeightChartData'
+import type { ChartDataPoint } from '@/hooks/useWeightChartData'
+import {
+  CHART_MA_SUFFIX,
+  useWeightChartData,
+} from '@/hooks/useWeightChartData'
 import {
   CartesianGrid,
   Legend,
@@ -25,10 +29,24 @@ const CHART_COLORS = [
 
 interface WeightProgressChartProps {
   height?: number
+  chartData?: ChartDataPoint[]
+  participants?: string[]
+  loading?: boolean
+  error?: string | null
 }
 
-export function WeightProgressChart({ height = 350 }: WeightProgressChartProps) {
-  const { chartData, participants, loading, error } = useWeightChartData()
+export function WeightProgressChart({
+  height = 350,
+  chartData: chartDataProp,
+  participants: participantsProp,
+  loading: loadingProp,
+  error: errorProp,
+}: WeightProgressChartProps) {
+  const hook = useWeightChartData()
+  const chartData = chartDataProp ?? hook.chartData
+  const participants = participantsProp ?? hook.participants
+  const loading = loadingProp ?? hook.loading
+  const error = errorProp ?? hook.error
 
   if (loading) {
     return <ChartLoadingState height={height} />
@@ -70,18 +88,39 @@ export function WeightProgressChart({ height = 350 }: WeightProgressChartProps) 
           formatter={(value: number, name: string) => [`${value.toFixed(1)} kg`, name]}
         />
         <Legend wrapperStyle={{ paddingTop: '10px' }} />
-        {participants.map((participant, index) => (
-          <Line
-            key={participant}
-            type="monotone"
-            dataKey={participant}
-            stroke={CHART_COLORS[index % CHART_COLORS.length]}
-            strokeWidth={2}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-            connectNulls
-          />
-        ))}
+        {participants.map((participant, index) => {
+          const color = CHART_COLORS[index % CHART_COLORS.length]
+          return (
+            <Line
+              key={participant}
+              type="monotone"
+              dataKey={participant}
+              name={participant}
+              stroke={color}
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+              connectNulls
+            />
+          )
+        })}
+        {participants.map((participant, index) => {
+          const color = CHART_COLORS[index % CHART_COLORS.length]
+          return (
+            <Line
+              key={`${participant}${CHART_MA_SUFFIX}`}
+              type="monotone"
+              dataKey={participant + CHART_MA_SUFFIX}
+              name={`${participant} (media móvil)`}
+              stroke={color}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+              activeDot={{ r: 4 }}
+              connectNulls
+            />
+          )
+        })}
       </LineChart>
     </ResponsiveContainer>
   )

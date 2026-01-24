@@ -3,11 +3,9 @@
 export const dynamic = 'force-dynamic'
 
 import { LeaderboardTable } from '@/components/stats/LeaderboardTable'
-import { WeightProgressChart } from '@/components/stats/WeightProgressChart'
+import { WeightProgressSection } from '@/components/stats/WeightProgressSection'
 import { LinkButton } from '@/components/ui'
-import { useLoading } from '@/contexts/LoadingContext'
 import { useParticipants } from '@/hooks/useParticipants'
-import { useWeightChartData } from '@/hooks/useWeightChartData'
 import { useEffect, useState } from 'react'
 import {
   HiOutlineClock,
@@ -48,8 +46,6 @@ export default function Dashboard() {
     loading: participantsLoading,
     error
   } = useParticipants({ includeRankings: true })
-  const { loading: chartLoading } = useWeightChartData()
-  const { setInitialLoadComplete } = useLoading()
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft())
 
   useEffect(() => {
@@ -59,17 +55,6 @@ export default function Dashboard() {
 
     return () => clearInterval(timer)
   }, [])
-
-  // Track initial load completion
-  useEffect(() => {
-    if (!participantsLoading && !chartLoading) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => {
-        setInitialLoadComplete()
-      }, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [participantsLoading, chartLoading, setInitialLoadComplete])
 
   return (
     <div className='bg-mesh min-h-screen py-8'>
@@ -178,16 +163,7 @@ export default function Dashboard() {
 
         {/* Weight Progress Chart */}
         <div className='animate-fade-in-up stagger-3 mt-8 card-hover rounded-lg bg-white/80 p-4 shadow-lg backdrop-blur-sm sm:p-6 dark:bg-gray-800/80'>
-          <div className='mb-6'>
-            <h2 className='text-xl font-bold text-gray-900 sm:text-2xl dark:text-white'>
-              📈 Progreso de Peso
-            </h2>
-            <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
-              Evolución del peso de todos los participantes a lo largo del
-              tiempo
-            </p>
-          </div>
-          <WeightProgressChart />
+          <WeightProgressSection />
         </div>
 
         {/* Info Section */}

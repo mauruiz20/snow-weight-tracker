@@ -4,6 +4,12 @@ import {
   fetchParticipantsWithInitialWeight,
   fetchWeightRecordsWithParticipants,
 } from '@/lib/api'
+import type { TrendResult } from '@/utils/weight-trend'
+import {
+  buildWeightSeries,
+  computeMovingAverage,
+  computeTrend,
+} from '@/utils/weight-trend'
 import { useCallback, useEffect, useState } from 'react'
 
 interface WeightEntry {
@@ -13,15 +19,18 @@ interface WeightEntry {
   recordedAt: string
 }
 
+export const CHART_MA_SUFFIX = ' (media)'
+
 export interface ChartDataPoint {
   date: string
   timestamp: number
   [key: string]: string | number
 }
 
-interface UseWeightChartDataReturn {
+export interface UseWeightChartDataReturn {
   chartData: ChartDataPoint[]
   participants: string[]
+  participantTrends: Record<string, TrendResult>
   loading: boolean
   error: string | null
   refetch: () => Promise<void>
@@ -33,6 +42,7 @@ interface UseWeightChartDataReturn {
 export function useWeightChartData(): UseWeightChartDataReturn {
   const [chartData, setChartData] = useState<ChartDataPoint[]>([])
   const [participants, setParticipants] = useState<string[]>([])
+  const [participantTrends, setParticipantTrends] = useState<Record<string, TrendResult>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,21 +51,28 @@ export function useWeightChartData(): UseWeightChartDataReturn {
     setError(null)
 
     try {
-      // Fetch data from API layer
       const [records, participantsData] = await Promise.all([
         fetchWeightRecordsWithParticipants(),
         fetchParticipantsWithInitialWeight(),
       ])
 
-      // Transform raw data into normalized entries
       const entries = transformToEntries(records, participantsData)
-
-      // Get unique participant names
       const uniqueParticipants = [...new Set(entries.map((e) => e.participantName))]
       setParticipants(uniqueParticipants)
 
-      // Transform entries into chart-ready data points
-      const data = transformToChartData(entries, uniqueParticipants)
+      let data = transformToChartData(entries, uniqueParticipants)
+      data = addMovingAverageToChartData(data, entries, participantsData, uniqueParticipants)
+
+      const trends: Record<string, TrendResult> = {}
+      for (const p of participantsData) {
+        const partEntries = entries.filter((e) => e.participantId === p.id)
+        const recordsOnly = partEntries
+          .filter((e) => !(e.recordedAt === p.created_at && e.weight === p.initial_weight))
+          .map((e) => ({ weight: e.weight, recorded_at: e.recordedAt }))
+        const series = buildWeightSeries(p.initial_weight, p.created_at, recordsOnly)
+        trends[p.name] = computeTrend(series)
+      }
+      setParticipantTrends(trends)
       setChartData(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar datos del gráfico')
@@ -71,6 +88,7 @@ export function useWeightChartData(): UseWeightChartDataReturn {
   return {
     chartData,
     participants,
+    participantTrends,
     loading,
     error,
     refetch: fetchData,
@@ -173,4 +191,49 @@ function fillMissingValues(chartData: ChartDataPoint[], participants: string[]):
       }
     }
   }
+}
+
+function dateKey(ms: number): string {
+  return new Date(ms).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+}
+
+/**
+ * Adds moving average (media) series per participant; N=7, min 3 points.
+ */
+function addMovingAverageToChartData(
+  chartData: ChartDataPoint[],
+  entries: WeightEntry[],
+  participantsData: Array<{ id: string; name: string; initial_weight: number; created_at: string }>,
+  participants: string[]
+): ChartDataPoint[] {
+  const sorted = [...chartData].sort((a, b) => (a.timestamp as number) - (b.timestamp as number))
+  const byName = new Map(
+    participantsData.map((p) => [p.name, p])
+  )
+
+  for (const name of participants) {
+    const p = byName.get(name)
+    if (!p) continue
+    const partEntries = entries.filter((e) => e.participantId === p.id)
+    const recordsOnly = partEntries
+      .filter((e) => !(e.recordedAt === p.created_at && e.weight === p.initial_weight))
+      .map((e) => ({ weight: e.weight, recorded_at: e.recordedAt }))
+    const series = buildWeightSeries(p.initial_weight, p.created_at, recordsOnly)
+    const maSeries = computeMovingAverage(series, 7, 3)
+    const maByDate = new Map(maSeries.map((m) => [dateKey(m.timestampMs), m.weight]))
+
+    let lastMa: number | undefined
+    const key = name + CHART_MA_SUFFIX
+    for (const point of sorted) {
+      const d = point.date
+      const v = maByDate.get(d)
+      if (v !== undefined) {
+        lastMa = v
+        point[key] = v
+      } else if (lastMa !== undefined) {
+        point[key] = lastMa
+      }
+    }
+  }
+  return sorted
 }
