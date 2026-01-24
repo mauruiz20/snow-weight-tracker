@@ -7,7 +7,7 @@ interface WeightTrendCardProps {
   result: TrendResult
 }
 
-export function WeightTrendCard({ result }: WeightTrendCardProps) {
+export const WeightTrendCard = ({ result }: WeightTrendCardProps) => {
   const { method, trendKgPerWeek, predictedWeight, targetDate, isInitialEstimate } = result
 
   if (method === 'insufficient') {

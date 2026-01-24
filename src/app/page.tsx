@@ -6,6 +6,7 @@ import { LeaderboardTable } from '@/components/stats/LeaderboardTable'
 import { WeightProgressSection } from '@/components/stats/WeightProgressSection'
 import { LinkButton } from '@/components/ui'
 import { useParticipants } from '@/hooks/useParticipants'
+import { ANIMATION_CONFIG, ROUTES, TARGET_DATE } from '@/lib/constants'
 import { useEffect, useState } from 'react'
 import {
   HiOutlineClock,
@@ -14,8 +15,6 @@ import {
   HiOutlineUserPlus,
   HiOutlineUsers
 } from 'react-icons/hi2'
-
-const TARGET_DATE = new Date('2026-08-01T00:00:00')
 
 interface TimeLeft {
   days: number
@@ -40,18 +39,22 @@ const calculateTimeLeft = (): TimeLeft => {
   }
 }
 
-export default function Dashboard() {
+const Dashboard = () => {
   const {
     rankings,
     loading: participantsLoading,
     error
   } = useParticipants({ includeRankings: true })
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft())
+  // Initialize as null to avoid hydration mismatch (server vs client time difference)
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null)
 
   useEffect(() => {
+    // Set initial value on client only
+    setTimeLeft(calculateTimeLeft())
+
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft())
-    }, 1000)
+    }, ANIMATION_CONFIG.countdownIntervalMs)
 
     return () => clearInterval(timer)
   }, [])
@@ -81,7 +84,7 @@ export default function Dashboard() {
             <div className='flex justify-center gap-2 sm:gap-4'>
               <div className='rounded-lg bg-linear-to-br from-blue-500 to-blue-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3'>
                 <div className='text-2xl font-bold sm:text-3xl'>
-                  {timeLeft.days}
+                  {timeLeft?.days ?? '--'}
                 </div>
                 <div className='text-xs uppercase tracking-wide opacity-80'>
                   Días
@@ -89,7 +92,7 @@ export default function Dashboard() {
               </div>
               <div className='rounded-lg bg-linear-to-br from-green-500 to-green-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3'>
                 <div className='text-2xl font-bold sm:text-3xl'>
-                  {String(timeLeft.hours).padStart(2, '0')}
+                  {timeLeft ? String(timeLeft.hours).padStart(2, '0') : '--'}
                 </div>
                 <div className='text-xs uppercase tracking-wide opacity-80'>
                   Horas
@@ -97,7 +100,7 @@ export default function Dashboard() {
               </div>
               <div className='rounded-lg bg-linear-to-br from-amber-500 to-amber-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3'>
                 <div className='text-2xl font-bold sm:text-3xl'>
-                  {String(timeLeft.minutes).padStart(2, '0')}
+                  {timeLeft ? String(timeLeft.minutes).padStart(2, '0') : '--'}
                 </div>
                 <div className='text-xs uppercase tracking-wide opacity-80'>
                   Min
@@ -105,7 +108,7 @@ export default function Dashboard() {
               </div>
               <div className='rounded-lg bg-linear-to-br from-purple-500 to-purple-600 px-3 py-2 text-white shadow-lg sm:px-4 sm:py-3'>
                 <div className='text-2xl font-bold sm:text-3xl'>
-                  {String(timeLeft.seconds).padStart(2, '0')}
+                  {timeLeft ? String(timeLeft.seconds).padStart(2, '0') : '--'}
                 </div>
                 <div className='text-xs uppercase tracking-wide opacity-80'>
                   Seg
@@ -118,7 +121,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className='animate-fade-in-up stagger-1 mb-8 flex flex-wrap justify-center gap-3'>
           <LinkButton
-            href='/participants/new'
+            href={ROUTES.participantNew}
             size='lg'
             icon={<HiOutlineUserPlus className='h-5 w-5' />}
             className='btn-press'
@@ -126,7 +129,7 @@ export default function Dashboard() {
             Registrarse Ahora
           </LinkButton>
           <LinkButton
-            href='/participants'
+            href={ROUTES.participants}
             variant='secondary'
             size='lg'
             icon={<HiOutlineUsers className='h-5 w-5' />}
@@ -216,3 +219,5 @@ export default function Dashboard() {
     </div>
   )
 }
+
+export default Dashboard

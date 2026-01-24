@@ -4,7 +4,7 @@ import { useWeightChartData } from '@/hooks/useWeightChartData'
 import { WeightProgressChart } from './WeightProgressChart'
 import { WeightTrendsSummary } from './WeightTrendsSummary'
 
-export function WeightProgressSection() {
+export const WeightProgressSection = () => {
   const { chartData, participants, participantTrends, loading, error } =
     useWeightChartData()
 

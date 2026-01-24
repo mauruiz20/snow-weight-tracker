@@ -20,7 +20,7 @@ interface WeightRecordListProps {
   onCancelEdit?: () => void
 }
 
-export function WeightRecordList({
+export const WeightRecordList = ({
   records,
   loading = false,
   editingId,
@@ -28,7 +28,7 @@ export function WeightRecordList({
   onUpdate,
   onDelete,
   onCancelEdit,
-}: WeightRecordListProps) {
+}: WeightRecordListProps) => {
   if (loading) {
     return (
       <div className="space-y-3">

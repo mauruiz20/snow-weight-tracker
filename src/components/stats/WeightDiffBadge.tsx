@@ -7,12 +7,12 @@ interface WeightDiffBadgeProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-export function WeightDiffBadge({
+export const WeightDiffBadge = ({
   diff,
   showPercentage = false,
   percentage = 0,
   size = 'md',
-}: WeightDiffBadgeProps) {
+}: WeightDiffBadgeProps) => {
   const isLoss = diff < 0
   const isGain = diff > 0
 

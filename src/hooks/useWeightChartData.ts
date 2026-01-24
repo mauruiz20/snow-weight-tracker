@@ -4,6 +4,7 @@ import {
   fetchParticipantsWithInitialWeight,
   fetchWeightRecordsWithParticipants,
 } from '@/lib/api'
+import { LOCALE } from '@/lib/constants'
 import type { TrendResult } from '@/utils/weight-trend'
 import {
   buildWeightSeries,
@@ -151,7 +152,7 @@ function transformToChartData(
 
   for (const entry of entries) {
     const date = new Date(entry.recordedAt)
-    const dateKey = date.toLocaleDateString('es-ES', {
+    const dateKey = date.toLocaleDateString(LOCALE, {
       day: '2-digit',
       month: 'short',
     })
@@ -194,7 +195,7 @@ function fillMissingValues(chartData: ChartDataPoint[], participants: string[]):
 }
 
 function dateKey(ms: number): string {
-  return new Date(ms).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+  return new Date(ms).toLocaleDateString(LOCALE, { day: '2-digit', month: 'short' })
 }
 
 /**

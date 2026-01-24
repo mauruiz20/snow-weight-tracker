@@ -12,12 +12,12 @@ interface WeightRecordCardProps {
   onDelete?: () => void
 }
 
-export function WeightRecordCard({
+export const WeightRecordCard = ({
   record,
   previousWeight,
   onEdit,
   onDelete,
-}: WeightRecordCardProps) {
+}: WeightRecordCardProps) => {
   const diff = previousWeight ? record.weight - previousWeight : null
 
   const getDiffColor = (d: number | null) => {

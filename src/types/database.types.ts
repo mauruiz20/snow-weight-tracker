@@ -10,6 +10,7 @@ export interface Database {
           age: number
           gender: 'male' | 'female'
           initial_weight: number
+          target_weight: number | null
           height: number
           created_at: string
           updated_at: string
@@ -20,6 +21,7 @@ export interface Database {
           age: number
           gender?: 'male' | 'female'
           initial_weight: number
+          target_weight?: number | null
           height: number
           created_at?: string
           updated_at?: string
@@ -30,6 +32,7 @@ export interface Database {
           age?: number
           gender?: 'male' | 'female'
           initial_weight?: number
+          target_weight?: number | null
           height?: number
           created_at?: string
           updated_at?: string
@@ -118,6 +121,7 @@ export interface Database {
           age: number
           gender: 'male' | 'female'
           initial_weight: number
+          target_weight: number | null
           height: number
           created_at: string
           current_weight: number
@@ -129,6 +133,7 @@ export interface Database {
           total_records: number
           current_bmi: number | null
           body_fat_percentage: number | null
+          goal_progress_percentage: number | null
         }
         Relationships: []
       }

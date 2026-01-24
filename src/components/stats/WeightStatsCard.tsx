@@ -9,7 +9,7 @@ interface WeightStatsCardProps {
   stats: WeightStats
 }
 
-export function WeightStatsCard({ participant, stats }: WeightStatsCardProps) {
+export const WeightStatsCard = ({ participant, stats }: WeightStatsCardProps) => {
   const {
     currentWeight,
     weightDiff,

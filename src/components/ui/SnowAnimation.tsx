@@ -1,5 +1,6 @@
 'use client'
 
+import { ANIMATION_CONFIG, isMobile } from '@/lib/constants'
 import { useState } from 'react'
 
 interface Snowflake {
@@ -12,21 +13,25 @@ interface Snowflake {
 }
 
 const generateSnowflakes = (): Snowflake[] => {
-  // Detect if mobile device (screen width < 768px)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  if (typeof window === 'undefined') return []
 
-  // Reduce snowflakes on mobile for better performance
-  // Desktop: 35 snowflakes, Mobile: 12 snowflakes
-  const flakeCount = isMobile ? 12 : 35
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (prefersReducedMotion) return []
+
+  const mobile = isMobile()
+  const flakeCount = mobile
+    ? ANIMATION_CONFIG.snowflakesMobile
+    : ANIMATION_CONFIG.snowflakesDesktop
 
   // Generate random snowflakes
   return Array.from({ length: flakeCount }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
     delay: Math.random() * 8,
-    duration: 10 + Math.random() * 10,
-    size: isMobile ? 6 + Math.random() * 8 : 8 + Math.random() * 12, // Smaller on mobile
-    opacity: isMobile ? 0.3 + Math.random() * 0.3 : 0.5 + Math.random() * 0.4 // Lower opacity on mobile
+    duration: 12 + Math.random() * 8,
+    size: mobile ? 8 + Math.random() * 6 : 10 + Math.random() * 10,
+    opacity: mobile ? 0.4 + Math.random() * 0.2 : 0.5 + Math.random() * 0.3
   }))
 }
 

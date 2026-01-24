@@ -1,17 +1,55 @@
 'use client'
 
 import { LinkButton } from '@/components/ui'
+import { CHART_CONFIG, ROUTES } from '@/lib/constants'
 import type { ParticipantRanking } from '@/types/database.types'
 import Link from 'next/link'
 import { HiOutlineUserPlus } from 'react-icons/hi2'
 import { WeightDiffBadge } from './WeightDiffBadge'
+
+interface GoalProgressMiniProps {
+  progress: number
+  targetWeight: number
+}
+
+const GoalProgressMini = ({ progress, targetWeight }: GoalProgressMiniProps) => {
+  const clampedProgress = Math.min(100, Math.max(0, progress))
+  const isComplete = progress >= 100
+
+  const getBarColor = () => {
+    if (isComplete) return 'bg-green-500'
+    if (clampedProgress >= 75) return 'bg-green-500'
+    if (clampedProgress >= 50) return 'bg-blue-500'
+    if (clampedProgress >= 25) return 'bg-yellow-500'
+    return 'bg-orange-500'
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="flex items-center gap-1.5">
+        <div className="h-2 w-12 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+          <div
+            className={`h-full rounded-full transition-all ${getBarColor()}`}
+            style={{ width: `${clampedProgress}%` }}
+          />
+        </div>
+        <span className={`text-xs font-medium ${isComplete ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
+          {progress.toFixed(0)}%
+        </span>
+      </div>
+      <span className="text-[10px] text-gray-400 dark:text-gray-500">
+        → {targetWeight.toFixed(0)} kg
+      </span>
+    </div>
+  )
+}
 
 interface LeaderboardTableProps {
   rankings: ParticipantRanking[]
   loading?: boolean
 }
 
-export function LeaderboardTable({ rankings, loading = false }: LeaderboardTableProps) {
+export const LeaderboardTable = ({ rankings, loading = false }: LeaderboardTableProps) => {
   if (loading) {
     return (
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -36,7 +74,7 @@ export function LeaderboardTable({ rankings, loading = false }: LeaderboardTable
           ¡Sé el primero en registrarte y comenzar a rastrear!
         </p>
         <div className="mt-4">
-          <LinkButton href="/participants/new" icon={<HiOutlineUserPlus className="h-5 w-5" />}>
+          <LinkButton href={ROUTES.participantNew} icon={<HiOutlineUserPlus className="h-5 w-5" />}>
             Registrarse Ahora
           </LinkButton>
         </div>
@@ -54,95 +92,116 @@ export function LeaderboardTable({ rankings, loading = false }: LeaderboardTable
   }
 
   return (
-    <div className="-mx-4 overflow-x-auto sm:mx-0">
-      <div className="inline-block min-w-full align-middle">
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-900">
-          <tr>
-            <th
-              scope="col"
-              className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 dark:text-gray-400"
-            >
-              #
-            </th>
-            <th
-              scope="col"
-              className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 dark:text-gray-400"
-            >
-              Participante
-            </th>
-            <th
-              scope="col"
-              className="hidden px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 sm:table-cell dark:text-gray-400"
-            >
-              Inicial
-            </th>
-            <th
-              scope="col"
-              className="px-2 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 dark:text-gray-400"
-            >
-              Actual
-            </th>
-            <th
-              scope="col"
-              className="px-2 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-4 dark:text-gray-400"
-            >
-              Progreso
-            </th>
-            <th
-              scope="col"
-              className="hidden px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 md:table-cell dark:text-gray-400"
-            >
-              Registros
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-          {rankings.map((ranking, index) => {
-            const rank = index + 1
-            return (
-              <tr key={ranking.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <td className="whitespace-nowrap px-2 py-3 sm:px-4 sm:py-4">
-                  <span
-                    className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold sm:h-8 sm:w-8 sm:text-sm ${getRankBadge(rank)}`}
-                  >
-                    {rank}
-                  </span>
-                </td>
-                <td className="px-2 py-3 sm:px-4 sm:py-4">
-                  <Link href={`/participants/${ranking.id}`} className="group">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 sm:text-base dark:text-white dark:group-hover:text-blue-400">
-                      {ranking.name}
-                    </p>
-                    <p className="text-xs text-gray-500 sm:text-sm dark:text-gray-400">Edad: {ranking.age}</p>
-                  </Link>
-                </td>
-                <td className="hidden whitespace-nowrap px-4 py-4 text-right text-sm text-gray-500 sm:table-cell dark:text-gray-400">
-                  {ranking.initial_weight.toFixed(1)} kg
-                </td>
-                <td className="whitespace-nowrap px-2 py-3 text-right sm:px-4 sm:py-4">
-                  <span className="text-xs font-medium text-gray-900 sm:text-sm dark:text-white">
-                    {ranking.current_weight.toFixed(1)} kg
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-2 py-3 text-right sm:px-4 sm:py-4">
-                  <WeightDiffBadge
-                    diff={ranking.weight_diff}
-                    showPercentage
-                    percentage={ranking.weight_loss_percentage}
-                    size="sm"
-                  />
-                </td>
-                <td className="hidden whitespace-nowrap px-4 py-4 text-right text-sm text-gray-500 md:table-cell dark:text-gray-400">
-                  {ranking.total_records}
-                </td>
+    <div className="-mx-4 sm:mx-0">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <table className="w-full divide-y divide-gray-200 dark:divide-gray-700" style={{ minWidth: CHART_CONFIG.minTableWidth }}>
+            <thead className="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  #
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Participante
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Inicial
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Actual
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Progreso
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Meta
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                >
+                  Registros
+                </th>
               </tr>
-            )
-          })}
-        </tbody>
-      </table>
-        </div>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+              {rankings.map((ranking, index) => {
+                const rank = index + 1
+                return (
+                  <tr key={ranking.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="whitespace-nowrap px-3 py-3">
+                      <span
+                        className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${getRankBadge(rank)}`}
+                      >
+                        {rank}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3">
+                      <Link href={ROUTES.participant(ranking.id)} className="group">
+                        <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+                          {ranking.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {ranking.age} años
+                        </p>
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                      {ranking.initial_weight.toFixed(1)} kg
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-right">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {ranking.current_weight.toFixed(1)} kg
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-right">
+                      <WeightDiffBadge
+                        diff={ranking.weight_diff}
+                        showPercentage
+                        percentage={ranking.weight_loss_percentage}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3">
+                      {ranking.target_weight !== null ? (
+                        <GoalProgressMini
+                          progress={ranking.goal_progress_percentage ?? 0}
+                          targetWeight={ranking.target_weight}
+                        />
+                      ) : (
+                        <Link
+                          href={ROUTES.participant(ranking.id)}
+                          className="flex items-center justify-center gap-1 text-xs text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
+                        >
+                          <span>Agregar</span>
+                        </Link>
+                      )}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                      {ranking.total_records}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
       </div>
     </div>
   )

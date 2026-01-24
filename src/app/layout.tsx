@@ -19,18 +19,18 @@ export const metadata: Metadata = {
     'Ponte en forma para el viaje de snowboard a Chile en agosto 2026. Registra tu peso y compite con amigos.'
 }
 
-export default function RootLayout({
+const RootLayout = ({
   children
 }: Readonly<{
   children: React.ReactNode
-}>) {
-  return (
-    <html lang='es' suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <LayoutContent>{children}</LayoutContent>
-      </body>
-    </html>
-  )
-}
+}>) => (
+  <html lang='es' suppressHydrationWarning>
+    <body
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    >
+      <LayoutContent>{children}</LayoutContent>
+    </body>
+  </html>
+)
+
+export default RootLayout

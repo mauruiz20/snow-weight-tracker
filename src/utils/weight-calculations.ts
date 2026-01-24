@@ -1,3 +1,4 @@
+import { LOCALE } from '@/lib/constants'
 import type { Participant, ParticipantRanking, WeightRecord } from '@/types/database.types'
 
 /**
@@ -176,7 +177,7 @@ export function sortRankingsByWeightLoss(rankings: ParticipantRanking[]): Partic
  * Format date for display in Spanish
  */
 export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('es-ES', {
+  return new Date(dateString).toLocaleDateString(LOCALE, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -187,7 +188,7 @@ export function formatDate(dateString: string): string {
  * Format datetime for display in Spanish
  */
 export function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('es-ES', {
+  return new Date(dateString).toLocaleDateString(LOCALE, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

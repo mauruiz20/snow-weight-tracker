@@ -3,11 +3,16 @@
  * Robust to fast initial drop, plateaus, sparse/irregular records, and outliers.
  */
 
-const TAU_DAYS = 21 // decay half-life for WLS weighting
-const DEFAULT_TARGET_DATE = new Date('2026-08-01T00:00:00')
-const MAX_TREND_ABS_KG_PER_WEEK = 2 // clamp for display
-const OUTLIER_THRESHOLD_KG = 3 // deviation from MA to consider outlier
-const OUTLIER_WEIGHT_FACTOR = 0.1 // reduce outlier weight to 10%
+import { LOCALE, TARGET_DATE, TREND_CONFIG } from '@/lib/constants'
+
+const {
+  tauDays: TAU_DAYS,
+  maxTrendKgPerWeek: MAX_TREND_ABS_KG_PER_WEEK,
+  outlierThresholdKg: OUTLIER_THRESHOLD_KG,
+  outlierWeightFactor: OUTLIER_WEIGHT_FACTOR,
+  movingAverageWindow: MA_WINDOW,
+  movingAverageMinPoints: MA_MIN_POINTS,
+} = TREND_CONFIG
 
 export interface WeightPoint {
   timestampMs: number
@@ -66,8 +71,8 @@ export function buildWeightSeries(
  */
 export function computeMovingAverage(
   series: WeightPoint[],
-  windowPoints = 7,
-  minPoints = 3
+  windowPoints = MA_WINDOW,
+  minPoints = MA_MIN_POINTS
 ): WeightPoint[] {
   const n = series.length
   if (n === 0) return []
@@ -206,7 +211,7 @@ function recentWindowSlope(series: WeightPoint[], windowDays: number): number | 
  */
 export function computeTrend(
   series: WeightPoint[],
-  targetDate: Date = DEFAULT_TARGET_DATE
+  targetDate: Date = TARGET_DATE
 ): TrendResult {
   const currentWeight = series.length > 0 ? series[series.length - 1].weight : 0
 
@@ -291,7 +296,7 @@ export function formatTrendLabel(trendKgPerWeek: number): string {
 }
 
 export function formatTargetDate(date: Date): string {
-  return date.toLocaleDateString('es-ES', {
+  return date.toLocaleDateString(LOCALE, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

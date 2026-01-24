@@ -7,7 +7,7 @@ interface WeightTrendsSummaryProps {
   trends: Record<string, TrendResult>
 }
 
-export function WeightTrendsSummary({ trends }: WeightTrendsSummaryProps) {
+export const WeightTrendsSummary = ({ trends }: WeightTrendsSummaryProps) => {
   const entries = Object.entries(trends)
   if (entries.length === 0) return null
 

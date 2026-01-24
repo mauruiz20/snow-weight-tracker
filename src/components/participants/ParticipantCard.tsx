@@ -1,5 +1,6 @@
 'use client'
 
+import { ROUTES } from '@/lib/constants'
 import type { Participant } from '@/types/database.types'
 import { calculateBMI, formatDate, getBMICategory } from '@/utils/weight-calculations'
 import Link from 'next/link'
@@ -10,7 +11,7 @@ interface ParticipantCardProps {
   weightDiff?: number
 }
 
-export function ParticipantCard({ participant, currentWeight, weightDiff }: ParticipantCardProps) {
+export const ParticipantCard = ({ participant, currentWeight, weightDiff }: ParticipantCardProps) => {
   const displayWeight = currentWeight ?? participant.initial_weight
   const bmi = calculateBMI(displayWeight, participant.height)
   const bmiCategory = bmi ? getBMICategory(bmi) : null
@@ -27,7 +28,7 @@ export function ParticipantCard({ participant, currentWeight, weightDiff }: Part
   }
 
   return (
-    <Link href={`/participants/${participant.id}`}>
+    <Link href={ROUTES.participant(participant.id)}>
       <div className="card-hover rounded-lg border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:p-6 dark:border-gray-700/50 dark:bg-gray-800/80">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>

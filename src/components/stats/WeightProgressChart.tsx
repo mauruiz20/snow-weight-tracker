@@ -5,6 +5,8 @@ import {
   CHART_MA_SUFFIX,
   useWeightChartData,
 } from '@/hooks/useWeightChartData'
+import { CHART_COLORS, CHART_CONFIG, isMobile } from '@/lib/constants'
+import { useEffect, useState } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -16,17 +18,6 @@ import {
   YAxis,
 } from 'recharts'
 
-const CHART_COLORS = [
-  '#3b82f6', // blue
-  '#10b981', // green
-  '#f59e0b', // amber
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#f97316', // orange
-  '#84cc16', // lime
-]
-
 interface WeightProgressChartProps {
   height?: number
   chartData?: ChartDataPoint[]
@@ -35,18 +26,26 @@ interface WeightProgressChartProps {
   error?: string | null
 }
 
-export function WeightProgressChart({
-  height = 350,
+export const WeightProgressChart = ({
+  height = CHART_CONFIG.defaultHeight,
   chartData: chartDataProp,
   participants: participantsProp,
   loading: loadingProp,
   error: errorProp,
-}: WeightProgressChartProps) {
+}: WeightProgressChartProps) => {
   const hook = useWeightChartData()
   const chartData = chartDataProp ?? hook.chartData
   const participants = participantsProp ?? hook.participants
   const loading = loadingProp ?? hook.loading
   const error = errorProp ?? hook.error
+
+  // Hide moving average by default on mobile (less clutter)
+  const [showMovingAverage, setShowMovingAverage] = useState(true)
+
+  useEffect(() => {
+    // Default to hidden on mobile
+    setShowMovingAverage(!isMobile())
+  }, [])
 
   if (loading) {
     return <ChartLoadingState height={height} />
@@ -61,8 +60,22 @@ export function WeightProgressChart({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+    <div>
+      {/* Toggle for moving average */}
+      <div className="mb-3 flex items-center justify-end">
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <input
+            type="checkbox"
+            checked={showMovingAverage}
+            onChange={(e) => setShowMovingAverage(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+          />
+          Mostrar media móvil
+        </label>
+      </div>
+
+      <ResponsiveContainer width="100%" height={height}>
+        <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
         <XAxis
           dataKey="date"
@@ -104,7 +117,7 @@ export function WeightProgressChart({
             />
           )
         })}
-        {participants.map((participant, index) => {
+        {showMovingAverage && participants.map((participant, index) => {
           const color = CHART_COLORS[index % CHART_COLORS.length]
           return (
             <Line
@@ -121,33 +134,28 @@ export function WeightProgressChart({
             />
           )
         })}
-      </LineChart>
-    </ResponsiveContainer>
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
 // --- UI State Components ---
 
-function ChartLoadingState({ height }: { height: number }) {
-  return (
-    <div className="flex items-center justify-center" style={{ height }}>
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-    </div>
-  )
-}
+const ChartLoadingState = ({ height }: { height: number }) => (
+  <div className="flex items-center justify-center" style={{ height }}>
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+  </div>
+)
 
-function ChartErrorState({ message, height }: { message: string; height: number }) {
-  return (
-    <div className="flex items-center justify-center text-red-500 dark:text-red-400" style={{ height }}>
-      <p>Error: {message}</p>
-    </div>
-  )
-}
+const ChartErrorState = ({ message, height }: { message: string; height: number }) => (
+  <div className="flex items-center justify-center text-red-500 dark:text-red-400" style={{ height }}>
+    <p>Error: {message}</p>
+  </div>
+)
 
-function ChartEmptyState({ height }: { height: number }) {
-  return (
-    <div className="flex items-center justify-center text-gray-500 dark:text-gray-400" style={{ height }}>
-      No hay datos de peso registrados aún
-    </div>
-  )
-}
+const ChartEmptyState = ({ height }: { height: number }) => (
+  <div className="flex items-center justify-center text-gray-500 dark:text-gray-400" style={{ height }}>
+    No hay datos de peso registrados aún
+  </div>
+)

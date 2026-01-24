@@ -10,6 +10,7 @@ interface ParticipantFormData {
   age: number
   gender: 'male' | 'female'
   initial_weight: number
+  target_weight?: number | null
   height: number
   created_at?: string
 }
@@ -21,16 +22,17 @@ interface ParticipantFormProps {
   isLoading?: boolean
 }
 
-export function ParticipantForm({
+export const ParticipantForm = ({
   participant,
   onSubmit,
   onCancel,
   isLoading = false,
-}: ParticipantFormProps) {
+}: ParticipantFormProps) => {
   const [name, setName] = useState(participant?.name || '')
   const [age, setAge] = useState(participant?.age?.toString() || '')
   const [gender, setGender] = useState<'male' | 'female'>(participant?.gender || 'male')
   const [initialWeight, setInitialWeight] = useState(participant?.initial_weight?.toString() || '')
+  const [targetWeight, setTargetWeight] = useState(participant?.target_weight?.toString() || '')
   const [height, setHeight] = useState(participant?.height?.toString() || '')
   const [initialDate, setInitialDate] = useState(() => {
     if (participant?.created_at) {
@@ -70,12 +72,23 @@ export function ParticipantForm({
       return
     }
 
+    // Validate target weight if provided
+    let targetWeightNum: number | null = null
+    if (targetWeight) {
+      targetWeightNum = Number.parseFloat(targetWeight)
+      if (isNaN(targetWeightNum) || targetWeightNum <= 0 || targetWeightNum >= 500) {
+        setError('El peso objetivo debe estar entre 0.01 y 499.99 kg')
+        return
+      }
+    }
+
     try {
       const data: ParticipantFormData = {
         name: name.trim(),
         age: ageNum,
         gender,
         initial_weight: weightNum,
+        target_weight: targetWeightNum,
         height: heightNum,
       }
 
@@ -150,6 +163,20 @@ export function ParticipantForm({
         max={499.99}
         disabled={isLoading}
         required
+      />
+
+      <Input
+        id="targetWeight"
+        label="Peso Objetivo (kg)"
+        type="number"
+        value={targetWeight}
+        onChange={(e) => setTargetWeight(e.target.value)}
+        placeholder="Ingresa tu peso objetivo (opcional)"
+        step={0.01}
+        min={0.01}
+        max={499.99}
+        disabled={isLoading}
+        helperText="El peso que deseas alcanzar para el viaje."
       />
 
       {isEditing && (

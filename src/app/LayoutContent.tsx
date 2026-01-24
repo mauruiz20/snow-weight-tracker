@@ -1,13 +1,14 @@
 'use client'
 
 import { LavaBlobs, Loader, SnowAnimation, ThemeToggle } from '@/components/ui'
+import { ANIMATION_CONFIG } from '@/lib/constants'
 import { useEffect, useState } from 'react'
 
-export function LayoutContent({ children }: { children: React.ReactNode }) {
+export const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500)
+    const timer = setTimeout(() => setIsLoading(false), ANIMATION_CONFIG.loaderDurationMs)
     return () => clearTimeout(timer)
   }, [])
 

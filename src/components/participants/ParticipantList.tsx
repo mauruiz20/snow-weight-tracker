@@ -9,11 +9,11 @@ interface ParticipantListProps {
   loading?: boolean
 }
 
-export function ParticipantList({
+export const ParticipantList = ({
   participants,
   rankings = [],
   loading = false,
-}: ParticipantListProps) {
+}: ParticipantListProps) => {
   if (loading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

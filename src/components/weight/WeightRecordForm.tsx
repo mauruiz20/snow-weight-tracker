@@ -6,7 +6,7 @@ import { type FormEvent, useState } from 'react'
 import { HiOutlineCheck, HiOutlinePlus, HiOutlineXMark } from 'react-icons/hi2'
 
 // Format date to local datetime-local input format (YYYY-MM-DDTHH:mm)
-function toLocalDateTimeString(date: Date): string {
+const toLocalDateTimeString = (date: Date): string => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -28,12 +28,12 @@ interface WeightRecordFormProps {
   isLoading?: boolean
 }
 
-export function WeightRecordForm({
+export const WeightRecordForm = ({
   record,
   onSubmit,
   onCancel,
   isLoading = false,
-}: WeightRecordFormProps) {
+}: WeightRecordFormProps) => {
   const [weight, setWeight] = useState(record?.weight?.toString() || '')
   const [recordedAt, setRecordedAt] = useState(
     toLocalDateTimeString(record?.recorded_at ? new Date(record.recorded_at) : new Date())

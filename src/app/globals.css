@@ -244,6 +244,17 @@ body {
   filter: blur(80px);
   opacity: 0.75;
   mix-blend-mode: normal;
+  will-change: transform;
+}
+
+/* Mobile: reduce blur, size, and pause animations for better performance */
+@media (max-width: 768px) {
+  .lava-blob {
+    filter: blur(40px);
+    animation-play-state: paused !important;
+    opacity: 0.4;
+    transform: scale(0.5);
+  }
 }
 
 /* Light mode blob colors */
@@ -401,6 +412,14 @@ body {
 .snowflake {
   animation: snowfall linear infinite;
   text-shadow: 0 0 5px rgba(59, 130, 246, 0.6), 0 0 10px rgba(59, 130, 246, 0.3);
+  will-change: transform, opacity;
+}
+
+/* Mobile: simpler snowflakes */
+@media (max-width: 768px) {
+  .snowflake {
+    text-shadow: none;
+  }
 }
 
 .dark .snowflake {

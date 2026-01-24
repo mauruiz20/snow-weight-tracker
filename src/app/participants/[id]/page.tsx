@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { ParticipantForm } from '@/components/participants/ParticipantForm'
+import { WeightGoalProgress } from '@/components/stats/WeightGoalProgress'
 import { WeightStatsCard } from '@/components/stats/WeightStatsCard'
 import { WeightTrendCard } from '@/components/stats/WeightTrendCard'
 import { BackLink, Button } from '@/components/ui'
@@ -10,6 +11,7 @@ import { WeightRecordForm } from '@/components/weight/WeightRecordForm'
 import { WeightRecordList } from '@/components/weight/WeightRecordList'
 import { useParticipants } from '@/hooks/useParticipants'
 import { useWeightRecords } from '@/hooks/useWeightRecords'
+import { ROUTES } from '@/lib/constants'
 import type { Participant } from '@/types/database.types'
 import { calculateWeightStats } from '@/utils/weight-calculations'
 import { buildWeightSeries, computeTrend } from '@/utils/weight-trend'
@@ -21,6 +23,7 @@ interface ParticipantFormData {
   age: number
   gender: 'male' | 'female'
   initial_weight: number
+  target_weight?: number | null
   height: number
   created_at?: string
 }
@@ -29,7 +32,7 @@ interface ParticipantPageProps {
   params: Promise<{ id: string }>
 }
 
-export default function ParticipantPage({ params }: ParticipantPageProps) {
+const ParticipantPage = ({ params }: ParticipantPageProps) => {
   const { id } = use(params)
   const { getParticipant, updateParticipant } = useParticipants()
   const {
@@ -115,15 +118,15 @@ export default function ParticipantPage({ params }: ParticipantPageProps) {
 
   if (error || !participant) {
     return (
-      <div className='bg-mesh min-h-screen py-8'>
+      <div className='bg-mesh min-h-screen py-4 sm:py-8'>
         <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8'>
+          <div className='mb-4 pt-8 sm:mb-6 sm:pt-0'>
+            <BackLink href={ROUTES.participants}>Volver a Participantes</BackLink>
+          </div>
           <div className='rounded-md bg-red-50 p-4 dark:bg-red-900/30'>
             <p className='text-sm text-red-700 dark:text-red-400'>
               {error || 'Participante no encontrado'}
             </p>
-          </div>
-          <div className='mt-4'>
-            <BackLink href='/participants'>Volver a Participantes</BackLink>
           </div>
         </div>
       </div>
@@ -136,7 +139,7 @@ export default function ParticipantPage({ params }: ParticipantPageProps) {
     <div className='bg-mesh min-h-screen py-4 sm:py-8'>
       <div className='mx-auto max-w-4xl px-4 sm:px-6 lg:px-8'>
         <div className='mb-4 pt-8 sm:mb-6 sm:pt-0'>
-          <BackLink href='/participants'>Volver a Participantes</BackLink>
+          <BackLink href={ROUTES.participants}>Volver a Participantes</BackLink>
         </div>
 
         {/* Profile Section */}
@@ -175,6 +178,10 @@ export default function ParticipantPage({ params }: ParticipantPageProps) {
           ) : (
             <div className='mt-6 space-y-6'>
               <WeightStatsCard participant={participant} stats={stats} />
+              <WeightGoalProgress
+                participant={participant}
+                currentWeight={stats.currentWeight}
+              />
               <WeightTrendCard
                 result={computeTrend(
                   buildWeightSeries(
@@ -220,3 +227,5 @@ export default function ParticipantPage({ params }: ParticipantPageProps) {
     </div>
   )
 }
+
+export default ParticipantPage
