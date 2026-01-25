@@ -1,7 +1,8 @@
 'use client'
 
-import { ANIMATION_CONFIG, isMobile } from '@/lib/constants'
-import { useState } from 'react'
+import { useIsMobile } from '@/hooks/useBreakpoint'
+import { ANIMATION_CONFIG } from '@/lib/constants'
+import { useMemo } from 'react'
 
 interface Snowflake {
   id: number
@@ -12,14 +13,13 @@ interface Snowflake {
   opacity: number
 }
 
-const generateSnowflakes = (): Snowflake[] => {
+function generateSnowflakes(mobile: boolean): Snowflake[] {
   if (typeof window === 'undefined') return []
 
   // Check for reduced motion preference
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (prefersReducedMotion) return []
 
-  const mobile = isMobile()
   const flakeCount = mobile
     ? ANIMATION_CONFIG.snowflakesMobile
     : ANIMATION_CONFIG.snowflakesDesktop
@@ -36,8 +36,10 @@ const generateSnowflakes = (): Snowflake[] => {
 }
 
 export const SnowAnimation = () => {
-  // Use lazy initializer to generate snowflakes only once on mount
-  const [snowflakes] = useState<Snowflake[]>(generateSnowflakes)
+  const mobile = useIsMobile()
+
+  // Regenerate snowflakes when mobile/desktop changes
+  const snowflakes = useMemo(() => generateSnowflakes(mobile), [mobile])
 
   return (
     <div

@@ -287,12 +287,22 @@ export function predictWeight(
   return Number((currentWeight + trendKgPerWeek * weeks).toFixed(1))
 }
 
-export function formatTrendLabel(trendKgPerWeek: number): string {
+export type TrendDirection = 'down' | 'up' | 'neutral'
+
+export interface FormattedTrend {
+  direction: TrendDirection
+  value: string
+  label: string
+}
+
+export function formatTrendLabel(trendKgPerWeek: number): FormattedTrend {
   const abs = Math.abs(trendKgPerWeek)
-  const formatted = abs.toFixed(2)
-  if (trendKgPerWeek < 0) return `↓ ${formatted} kg/semana`
-  if (trendKgPerWeek > 0) return `↑ ${formatted} kg/semana`
-  return '0.00 kg/semana'
+  const value = abs.toFixed(2)
+  const label = `${value} kg/semana`
+
+  if (trendKgPerWeek < 0) return { direction: 'down', value, label }
+  if (trendKgPerWeek > 0) return { direction: 'up', value, label }
+  return { direction: 'neutral', value: '0.00', label: '0.00 kg/semana' }
 }
 
 export function formatTargetDate(date: Date): string {

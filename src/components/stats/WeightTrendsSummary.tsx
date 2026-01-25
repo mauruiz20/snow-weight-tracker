@@ -2,6 +2,7 @@
 
 import type { TrendResult } from '@/utils/weight-trend'
 import { formatTargetDate, formatTrendLabel } from '@/utils/weight-trend'
+import { TrendLabel } from '@/components/ui'
 
 interface WeightTrendsSummaryProps {
   trends: Record<string, TrendResult>
@@ -28,20 +29,20 @@ export const WeightTrendsSummary = ({ trends }: WeightTrendsSummaryProps) => {
               </li>
             )
           }
-          const trendLabel = formatTrendLabel(result.trendKgPerWeek)
+          const trend = formatTrendLabel(result.trendKgPerWeek)
           const targetStr = formatTargetDate(result.targetDate)
           const projection =
             result.predictedWeight != null
               ? `Si mantenés este ritmo, el ${targetStr} estarías en ~${result.predictedWeight} kg`
               : null
           return (
-            <li key={name} className='text-sm text-gray-700 dark:text-gray-300'>
-              <span className='font-medium'>{name}:</span>{' '}
-              <span>Tendencia real: {trendLabel}</span>
+            <li key={name} className='flex flex-wrap items-center gap-1 text-sm text-gray-700 dark:text-gray-300'>
+              <span className='font-medium'>{name}:</span>
+              <span>Tendencia real:</span>
+              <TrendLabel trend={trend} />
               {projection && (
                 <>
-                  {' — '}
-                  <span className='text-gray-600 dark:text-gray-400'>{projection}</span>
+                  <span className='text-gray-600 dark:text-gray-400'>— {projection}</span>
                 </>
               )}
             </li>

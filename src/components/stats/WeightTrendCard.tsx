@@ -2,6 +2,7 @@
 
 import type { TrendResult } from '@/utils/weight-trend'
 import { formatTargetDate, formatTrendLabel } from '@/utils/weight-trend'
+import { TrendLabel } from '@/components/ui'
 
 interface WeightTrendCardProps {
   result: TrendResult
@@ -23,14 +24,14 @@ export const WeightTrendCard = ({ result }: WeightTrendCardProps) => {
     )
   }
 
-  const trendLabel = formatTrendLabel(trendKgPerWeek)
+  const trend = formatTrendLabel(trendKgPerWeek)
   const targetDateStr = formatTargetDate(targetDate)
 
   return (
     <div className='rounded-lg border border-gray-200 bg-gray-50/80 p-4 dark:border-gray-700 dark:bg-gray-800/50'>
       <div className='space-y-2'>
         <p className='text-sm text-gray-600 dark:text-gray-400'>Tendencia real</p>
-        <p className='text-lg font-semibold text-gray-900 dark:text-white'>{trendLabel}</p>
+        <TrendLabel trend={trend} className='text-lg font-semibold' />
         {predictedWeight !== null && (
           <p className='text-sm text-gray-700 dark:text-gray-300'>
             Si mantenés este ritmo, el {targetDateStr} estarías en ~{predictedWeight} kg
